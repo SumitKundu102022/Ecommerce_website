@@ -77,23 +77,34 @@ const loginUser = async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    res
-      .cookie("token", token, {
-        httpOnly: true,
-        secure: true,
-        // sameSite: "none",
-        // maxAge: 24 * 60 * 60 * 1000,
-      })
-      .json({
-        success: true,
-        message: "User logged in successfully",
-        user: {
-          id: checkUser._id,
-          email: checkUser.email,
-          role: checkUser.role,
-          userName: checkUser.userName,
-        },
-      });
+    // res
+    //   .cookie("token", token, {
+    //     httpOnly: true,
+    //     secure: true,
+    //     // sameSite: "none",
+    //     // maxAge: 24 * 60 * 60 * 1000,
+    //   })
+    //   .json({
+    //     success: true,
+    //     message: "User logged in successfully",
+    //     user: {
+    //       id: checkUser._id,
+    //       email: checkUser.email,
+    //       role: checkUser.role,
+    //       userName: checkUser.userName,
+    //     },
+    //   });
+    res.status(200).json({
+      success: true,
+      message: "Logged in successfully",
+      token,
+          user: {
+            id: checkUser._id,
+            email: checkUser.email,
+            role: checkUser.role,
+            userName: checkUser.userName,
+          },
+    });
 
     // if (!email || !password) {
     //     return res.status(400).json({ message: "All fields are required" });
@@ -144,8 +155,30 @@ const logoutUser = async (req, res) => {
 //reset password
 
 //auth middleware
+// const authMiddleware = async (req, res, next) => {
+//   const token = req.cookies.token;
+//   if (!token) {
+//     return res.status(401).json({
+//       success: false,
+//       message: "Unauthorized user !",
+//     });
+//   }
+//   try {
+//     const decoded = jwt.verify(token, clientSecretKey);
+//     // req.user = await User.findById(decoded.id).select("-password");
+//     req.user = decoded;
+//     next();
+//   } catch (e) {
+//     console.log(e);
+//     res.status(500).json({
+//       success: false,
+//       message: `${e.message}` || "Internal server error(Some error occurred)",
+//     });
+//   }
+// };
 const authMiddleware = async (req, res, next) => {
-  const token = req.cookies.token;
+  const authHeader = req.headers["authorization"];
+  const token= authHeader && authHeader.split(" ")[1];
   if (!token) {
     return res.status(401).json({
       success: false,
